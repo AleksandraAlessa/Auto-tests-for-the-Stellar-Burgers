@@ -1,0 +1,53 @@
+name: Run autotests
+
+on:
+  push:
+    branches: [ main, master, develop3 ]   # запускать при пуше в главную ветку
+  pull_request:
+    branches: [ main, master, develop3 ]   # и при создании PR в главную ветку
+
+jobs:
+  test:
+    runs-on: ubuntu-latest       # используем свежий Ubuntu (там уже есть браузеры)
+
+    steps:
+      # 1. Скачать код из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Установить Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Установить зависимости (из requirements.txt)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Установить браузеры (для Selenium) – на ubuntu уже есть Chrome и Firefox,
+      #    но для уверенности можно поставить webdriver-manager или явно установить Chrome
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      # 5. Запустить тесты с генерацией отчёта в формате Allure (если используете)
+      - name: Run tests
+        env:
+          PYTHONUNBUFFERED: 1
+    # Для Chrome
+          CHROME_HEADLESS: true
+    # Для Firefox
+          MOZ_HEADLESS: true
+        run: |
+          pytest tests/ --alluredir=allure-results
+
+      # 6. (Опционально) Сохранить отчёт Allure как артефакт, чтобы скачать
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results

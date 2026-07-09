@@ -13,7 +13,8 @@ from generators import generate_unique_email
 from data import DEFAULT_PASSWORD, MAIN_URL, LOGIN_URL
 from locators import StellarLocators
 from test_data import TEST_USER
-
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
 
 @allure.step("Авторизоваться как {email}")
 def login_user(driver, email, password):
@@ -35,9 +36,16 @@ def registered_user():
 def driver(request):
     browser = request.param
     if browser == "chrome":
-        driver = webdriver.Chrome()
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--disable-gpu')
+        driver = webdriver.Chrome(options=chrome_options)
     elif browser == "firefox":
-        driver = webdriver.Firefox()
+        firefox_options = FirefoxOptions()
+        firefox_options.add_argument('--headless')
+        driver = webdriver.Firefox(options=firefox_options)
 
     yield driver
     driver.quit()
