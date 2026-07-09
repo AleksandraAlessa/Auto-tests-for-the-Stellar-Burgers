@@ -36,6 +36,12 @@ jobs:
 
       # 5. Запустить тесты с генерацией отчёта в формате Allure (если используете)
       - name: Run tests
+        env:
+          PYTHONUNBUFFERED: 1
+    # Для Chrome
+          CHROME_HEADLESS: true
+    # Для Firefox
+          MOZ_HEADLESS: true
         run: |
           pytest tests/ --alluredir=allure-results
 
